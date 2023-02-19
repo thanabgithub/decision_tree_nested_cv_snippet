@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.datasets import load_iris
 from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from sklearn.metrics import make_scorer, accuracy_score
 from joblib import dump
 import matplotlib.pyplot as plt
@@ -12,11 +12,12 @@ X, y = iris.data, iris.target
 
 # define the model and parameter grid
 model = DecisionTreeClassifier(random_state=42)
-param_grid = {
-    'criterion': ['gini', 'entropy'],
-    'max_depth': [3, 4, 5, 6, 7, 8],
-    'min_samples_split': [2, 3, 4, 5],
-    'min_samples_leaf': [1, 2, 3, 4, 5]
+param_space = {
+    "criterion": ["gini", "entropy"],
+    "splitter": ["best", "random"],
+    "max_depth": [None] + list(np.arange(1, 20)),
+    "min_samples_split": list(np.arange(2, 21)),
+    "min_samples_leaf": list(np.arange(1, 21)),
 }
 
 # define the nested cross-validation method
@@ -27,7 +28,9 @@ inner_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scorer = make_scorer(accuracy_score)
 
 # define the grid search object
-grid_search = GridSearchCV(model, param_grid=param_grid, cv=inner_cv, scoring=scorer)
+grid_search = RandomizedSearchCV(
+    model, param_space, n_iter=1000, scoring="accuracy", n_jobs=-1, cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+)
 
 # fit the grid search object using the nested cross-validation method
 scores = []
