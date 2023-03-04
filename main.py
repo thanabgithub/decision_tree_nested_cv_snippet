@@ -1,10 +1,12 @@
+
 import pandas as pd
 from sklearn.datasets import load_iris
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
-from sklearn.metrics import make_scorer, accuracy_score
+from sklearn.metrics import accuracy_score
 from joblib import dump
 import matplotlib.pyplot as plt
+import numpy as np
 
 # load the iris dataset
 iris = load_iris()
@@ -22,10 +24,6 @@ param_space = {
 
 # define the nested cross-validation method
 outer_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-inner_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-
-# define the evaluation metric
-scorer = make_scorer(accuracy_score)
 
 # define the grid search object
 grid_search = RandomizedSearchCV(
